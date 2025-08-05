@@ -1,0 +1,201 @@
+import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
+import { db, storage } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
+import { LogoExporter } from '@/lib/exportUtils';
+import type { OrderDetails, LogoFile } from '@/types/order';
+
+// Initialize Stripe with the latest API version
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2023-10-16'
+});
+
+async function generateLogoFiles(
+  businessName: string, 
+  sessionId: string, 
+  canvasData: any, 
+  packageId: 'standard' | 'premium'
+): Promise<LogoFile[]> {
+  const filePrefix = businessName.toLowerCase().replace(/\s+/g, '-');
+  const logoFiles: LogoFile[] = [];
+  const exporter = new LogoExporter(canvasData);
+  
+  // Generate PNG files in different sizes
+  const sizes = [
+    { name: 'large', width: 2048, height: 2048 },
+    { name: 'medium', width: 1024, height: 1024 },
+    { name: 'small', width: 512, height: 512 }
+  ];
+  
+  for (const size of sizes) {
+    const pngData = await exporter.exportLogo({
+      format: 'png',
+      quality: 1,
+      size: size.name as any,
+      addWatermark: false
+    });
+    
+    // Convert base64 to Buffer
+    const buffer = Buffer.from(pngData.split(',')[1], 'base64');
+    
+    // Upload to Firebase Storage
+    const filePath = `logos/${sessionId}/${filePrefix}-${size.name}.png`;
+    const fileRef = ref(storage, filePath);
+    await uploadBytes(fileRef, buffer);
+    
+    // Get download URL
+    const url = await getDownloadURL(fileRef);
+    
+    logoFiles.push({
+      type: 'PNG',
+      name: `${filePrefix}-logo-${size.name}.png`,
+      url,
+      size: `${(buffer.length / (1024 * 1024)).toFixed(1)} MB`,
+      path: filePath
+    });
+  }
+  
+  // Generate JPG version
+  const jpgData = await exporter.exportLogo({
+    format: 'jpg',
+    quality: 0.9,
+    size: 'large',
+    addWatermark: false
+  });
+  
+  const jpgBuffer = Buffer.from(jpgData.split(',')[1], 'base64');
+  const jpgPath = `logos/${sessionId}/${filePrefix}.jpg`;
+  const jpgRef = ref(storage, jpgPath);
+  await uploadBytes(jpgRef, jpgBuffer);
+  const jpgUrl = await getDownloadURL(jpgRef);
+  
+  logoFiles.push({
+    type: 'JPG',
+    name: `${filePrefix}-logo.jpg`,
+    url: jpgUrl,
+    size: `${(jpgBuffer.length / (1024 * 1024)).toFixed(1)} MB`,
+    path: jpgPath
+  });
+  
+  // Add SVG for premium package
+  if (packageId === 'premium') {
+    const svgData = await exporter.exportLogo({
+      format: 'svg',
+      quality: 1,
+      addWatermark: false
+    });
+    
+    const svgBuffer = Buffer.from(svgData);
+    const svgPath = `logos/${sessionId}/${filePrefix}.svg`;
+    const svgRef = ref(storage, svgPath);
+    await uploadBytes(svgRef, svgBuffer);
+    const svgUrl = await getDownloadURL(svgRef);
+    
+    logoFiles.push({
+      type: 'SVG',
+      name: `${filePrefix}-logo.svg`,
+      url: svgUrl,
+      size: `${(svgBuffer.length / 1024).toFixed(0)} KB`,
+      path: svgPath
+    });
+  }
+  
+  return logoFiles;
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get('session_id');
+    
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Missing session ID' },
+        { status: 400 }
+      );
+    }
+    
+    // Retrieve the checkout session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['customer', 'line_items', 'payment_intent'],
+    });
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Session not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Check if payment was successful
+    if (session.payment_status !== 'paid') {
+      return NextResponse.json(
+        { error: 'Payment not completed' },
+        { status: 400 }
+      );
+    }
+    
+    // Get package details from metadata
+    const packageId = session.metadata?.package_id as 'standard' | 'premium' || 'standard';
+    const businessName = session.metadata?.business_name || 'Your Business';
+    const canvasData = session.metadata?.canvas_data ? JSON.parse(session.metadata.canvas_data) : null;
+    
+    // Check if we already have a record of this purchase in Firestore
+    const orderRef = doc(db, 'orders', sessionId);
+    const orderDoc = await getDoc(orderRef);
+    
+    let downloadInfo: OrderDetails;
+    
+    if (orderDoc.exists()) {
+      // Order already processed, return existing download info
+      downloadInfo = orderDoc.data() as OrderDetails;
+    } else {
+      // Process new order and generate logo files
+      const logoFiles = await generateLogoFiles(
+        businessName,
+        sessionId,
+        canvasData,
+        packageId
+      );
+      
+      // Create download info object
+      downloadInfo = {
+        id: sessionId,
+        packageId,
+        status: 'complete',
+        customerEmail: session.customer_details?.email || '',
+        businessName,
+        purchaseDate: new Date().toISOString(),
+        logoFiles,
+        paymentDetails: {
+          amount: session.amount_total ? session.amount_total / 100 : 0,
+          currency: session.currency || 'usd',
+          paymentIntent: typeof session.payment_intent === 'string' 
+            ? session.payment_intent 
+            : session.payment_intent?.id || ''
+        }
+      };
+      
+      // Store in Firestore for future reference
+      await setDoc(orderRef, downloadInfo);
+    }
+    
+    return NextResponse.json(downloadInfo);
+    
+  } catch (error) {
+    console.error('Error processing checkout success:', error);
+    
+    if (error instanceof Stripe.errors.StripeError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
