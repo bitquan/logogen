@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#fff7ed"/>
+  <path d="M160 120h80v60h-80z M170 120v-20a30 30 0 0160 0v20" stroke="#ea580c" stroke-width="3" fill="none"/>
+  <text x="200" y="200" font-family="Poppins" font-size="30" font-weight="bold" fill="#ea580c" text-anchor="middle">SHOP</text>
+  <text x="200" y="230" font-family="Poppins" font-size="14" fill="#ea580c" text-anchor="middle">Premium Store</text>
+</svg>

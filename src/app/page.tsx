@@ -27,9 +27,9 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
         {/* Template Selection */}
-        <div className="lg:col-span-1">
+        <div className="xl:col-span-1">
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h2 className="text-xl font-semibold mb-4">Choose a Template</h2>
             <TemplateSelector 
@@ -40,9 +40,11 @@ export default function Home() {
         </div>
 
         {/* Logo Editor */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-3">
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h2 className="text-xl font-semibold mb-4">Customize Your Logo</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {selectedTemplate ? `Customize Your Logo - ${selectedTemplate.name}` : 'Customize Your Logo'}
+            </h2>
             <LogoEditor 
               selectedTemplate={selectedTemplate}
               logoData={logoData}

@@ -7,12 +7,29 @@ A modern, responsive logo generator web application that allows users to create 
 ## 🚀 Features
 
 ### Core Features
-- **Logo Generation Engine**: Text input for business name and tagline with real-time preview
+- **Advanced Logo Editor**: Professional drag-and-drop canvas editor with real-time preview
 - **Template Selection**: 8 professional logo templates across different industries
-- **Customization Interface**: 
-  - Color palette selection with predefined palettes
-  - Font selection from 8 professional fonts
-  - Real-time logo preview
+- **Rich Text Editing**: 
+  - 8 professional fonts with web font loading
+  - Font size, weight, alignment controls
+  - Letter spacing and line height adjustment
+  - Text decoration options
+  - Color customization
+- **Shape Library**: 
+  - Basic shapes (rectangles, circles, triangles)
+  - Advanced shape properties (fill, stroke, shadows)
+  - Opacity and layering controls
+- **Icon Collection**: Curated professional icons for different industries
+- **Layer Management**: 
+  - Layer visibility toggle
+  - Object locking/unlocking
+  - Layer reordering
+  - Duplicate and delete objects
+- **Advanced Customization**: 
+  - Color palette with hex/RGB support
+  - Shadow effects for shapes
+  - Object positioning and scaling
+  - Canvas background customization
 - **Export System**: 
   - Free preview with watermark
   - High-resolution PNG/JPG export (300 DPI)
@@ -20,14 +37,22 @@ A modern, responsive logo generator web application that allows users to create 
   - Commercial license included
 
 ### Templates Included
-1. **Modern Minimalist** - Clean typography with geometric shapes
-2. **Tech Startup** - Bold sans-serif with tech aesthetic
-3. **Restaurant & Food** - Script fonts with food industry appeal
-4. **Fitness & Health** - Strong fonts with health focus
-5. **Creative & Design** - Artistic fonts with creative elements
-6. **Corporate & Professional** - Classic fonts for business
-7. **E-commerce & Retail** - Friendly fonts for retail
-8. **Beauty & Wellness** - Elegant fonts for spa/beauty
+1. **Modern Minimalist** - Clean typography with geometric shapes and customizable elements
+2. **Tech Startup** - Bold sans-serif with tech aesthetic and icon integration
+3. **Restaurant & Food** - Script fonts with food industry icons and warm colors
+4. **Fitness & Health** - Strong fonts with health-focused shapes and energetic design
+5. **Creative & Design** - Artistic fonts with creative elements and flexible layouts
+6. **Corporate & Professional** - Classic fonts for business with professional styling
+7. **E-commerce & Retail** - Friendly fonts for retail with commerce-focused elements
+8. **Beauty & Wellness** - Elegant fonts for spa/beauty with sophisticated design elements
+
+### Advanced Editor Features
+- **Drag & Drop Interface**: Intuitive canvas-based editor
+- **Multi-layer Support**: Professional layer management with visibility controls
+- **Real-time Preview**: See changes instantly as you edit
+- **Professional Tools**: Text formatting, shape editing, color management
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- **Export Options**: Multiple file formats and resolutions
 
 ## 🛠 Tech Stack
 
@@ -88,14 +113,14 @@ npm run build
 
 ## 💰 Pricing
 
-- **Standard Package**: $19
+- **Standard Package**: $1.99
   - High-resolution PNG (300 DPI)
   - High-resolution JPG (300 DPI)
   - Transparent background version
   - Commercial license
   - Email delivery
 
-- **Premium Package**: $39
+- **Premium Package**: $4.99
   - Everything in Standard
   - Vector SVG file
   - Multiple color variations

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#fdf4ff"/>
+  <circle cx="200" cy="120" r="40" stroke="#7c3aed" stroke-width="3" fill="none"/>
+  <circle cx="180" cy="140" r="40" stroke="#7c3aed" stroke-width="3" fill="none"/>
+  <circle cx="220" cy="140" r="40" stroke="#7c3aed" stroke-width="3" fill="none"/>
+  <text x="200" y="200" font-family="Nunito" font-size="32" font-weight="bold" fill="#7c3aed" text-anchor="middle">CREATIVE</text>
+  <text x="200" y="230" font-family="Nunito" font-size="16" fill="#7c3aed" text-anchor="middle">Design Studio</text>
+</svg>
